@@ -6,6 +6,7 @@ const io = require('socket.io').listen(http);
 var players = [];
 var socketId = [];
 var gameStarted = false;
+var playerSpeed = 20;
 var numberOfPlayerReady = 0;
 app.use(express.static('static'));
 
@@ -33,6 +34,15 @@ io.on('connection', (socket) => {
             io.sockets.emit("game start");
             gameStarted = true;
         }
+    });
+
+    socket.on('player move', (player_name, direction) => {
+        players.forEach((player) => {
+            if(player.name === player_name){
+                player.move(direction, playerSpeed);
+                io.sockets.emit("player has moved", player);
+            }
+        })
     });
 
     socket.on('disconnect', function () {

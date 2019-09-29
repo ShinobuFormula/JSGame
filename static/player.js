@@ -10,7 +10,16 @@ class Player{
         this.width = 100;
     }
 
-    move(direction){
-
+    move(direction, speed){
+        switch(direction) {
+            case "right": this.x += speed;
+                break;
+            case "left": this.x += -speed;
+                break;
+            case "up": this.y += -speed;
+                break;
+            case "left": this.y += speed;
+                break;
+        }
     }
 }
