@@ -3,6 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 
+
 var players = [];
 var socketId = [];
 var gameStarted = false;
@@ -39,7 +40,8 @@ io.on('connection', (socket) => {
     socket.on('player move', (player_name, direction) => {
         players.forEach((player) => {
             if(player.name === player_name){
-                player.move(direction, playerSpeed);
+                io.sockets.emit("player clear", player);
+                move(player, direction, playerSpeed);
                 io.sockets.emit("player has moved", player);
             }
         })
@@ -57,6 +59,19 @@ io.on('connection', (socket) => {
             }
         })
     });
+
+    function move(player, direction, speed){
+        switch(direction){
+            case "RIGHT": player.x += speed;
+                break;
+            case "LEFT": player.x += -speed;
+                break;
+            case "UP": player.y += -speed;
+                break;
+            case "DOWN": player.y += speed;
+                break;
+        }
+    }
 });
 
 http.listen(3000, () => {

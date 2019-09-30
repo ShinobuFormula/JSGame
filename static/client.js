@@ -19,6 +19,7 @@ $(function () {
     var player_name = null;
     var direction = null;
     var gameStarted = false;
+    var tempPlayer = null;
 
     $readyButton.hide();
 
@@ -38,27 +39,24 @@ $(function () {
     });
 
     $(document).keypress((e) => {
-        if(e.keyCode === UP){
-            direction = "UP";
+        if(gameStarted) {
+            if (e.keyCode === UP) {
+                direction = "UP";
+            } else if (e.keyCode === DOWN) {
+                direction = "DOWN";
+            } else if (e.keyCode === RIGHT) {
+                direction = "RIGHT";
+            } else if (e.keyCode === LEFT) {
+                direction = "LEFT"
+            } else {
+                console.log("No valid key enter")
+            }
+            socket.emit('player move', player_name, direction);
         }
-        else if(e.keyCode === DOWN){
-            direction = "DOWN";
-        }
-        else if(e.keyCode === RIGHT){
-            direction = "RIGHT";
-        }
-        else if(e.keyCode === LEFT){
-            direction = "LEFT"
-        }
-        else{
-            console.log("No valid key enter")
-        }
-
-        socket.emit('player move', player_name, direction);
     });
 
     socket.on('send player_array', (players, gameStarted) => {
-        console.log(players)
+        console.log(players);
         players.forEach((player) => {
             $player_list.append("<p class=\""+ player.name + "\">" + player.name + "</p>");
             ctx.fillRect(player.x,player.y,player.width,player.height);
@@ -69,6 +67,7 @@ $(function () {
     });
 
     socket.on('new player', (player) => {
+        console.log(player);
         $player_list.append("<p class=\""+ player.name + "\">" + player.name + "</p>");
         ctx.fillRect(player.x,player.y,player.width,player.height);
     });
@@ -92,6 +91,10 @@ $(function () {
 
     socket.on("player has moved", (player) => {
         ctx.fillRect(player.x,player.y, player.width, player.height);
+    });
+
+    socket.on("player clear", (player) => {
+        ctx.clearRect(player.x,player.y, player.width, player.height);
     });
 
     socket.on('player disconnect', (player, x, y) =>{
