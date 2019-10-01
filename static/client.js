@@ -17,6 +17,7 @@ $(function () {
 
     var socket = io();
     var player_name = null;
+    var player_color = null;
     var direction = null;
     var gameStarted = false;
     var tempPlayer = null;
@@ -26,7 +27,7 @@ $(function () {
     $InscriptionForm.submit(function (e) {
         e.preventDefault();
 
-        socket.emit('new inscription', new Player($PseudoBox.val(), 'blue', 0, 0));
+        socket.emit('new inscription', new Player($PseudoBox.val(), 0, 0));
         player_name = $PseudoBox.val();
         $InscriptionForm.hide();
         $readyButton.show()
@@ -34,7 +35,6 @@ $(function () {
 
     $readyButton.click(function () {
         socket.emit('player ready', player_name);
-        $('.'+player_name+'').css("color", "red");
         this.remove();
     });
 
@@ -59,6 +59,7 @@ $(function () {
         console.log(players);
         players.forEach((player) => {
             $player_list.append("<p class=\""+ player.name + "\">" + player.name + "</p>");
+            ctx.fillStyle = player.color;
             ctx.fillRect(player.x,player.y,player.width,player.height);
         });
         if(gameStarted){
@@ -67,15 +68,13 @@ $(function () {
     });
 
     socket.on('new player', (player) => {
-        console.log(player);
         $player_list.append("<p class=\""+ player.name + "\">" + player.name + "</p>");
+        ctx.fillStyle = player.color;
         ctx.fillRect(player.x,player.y,player.width,player.height);
     });
 
     socket.on("send ready player", (player) => {
-        if(player !== player_name){
-            $('.'+player+'').css("color", "blue");
-        }
+            $('.'+player.name+'').css("color", player.color);
     });
 
     socket.on("game start", () => {
@@ -90,6 +89,7 @@ $(function () {
     });
 
     socket.on("player has moved", (player) => {
+        ctx.fillStyle = player.color;
         ctx.fillRect(player.x,player.y, player.width, player.height);
     });
 

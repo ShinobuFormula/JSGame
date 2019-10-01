@@ -1,7 +1,7 @@
 class Player{
-    constructor(name,color, x, y){
+    constructor(name, x, y){
         this.name = name;
-        this.color = color;
+        this.color = "black";
 
         this.x = x;
         this.y = y;
