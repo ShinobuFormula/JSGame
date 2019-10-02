@@ -8,6 +8,8 @@ class Player{
 
         this.height = 100;
         this.width = 100;
+
+        this.alive = true;
     }
 }
 

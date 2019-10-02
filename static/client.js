@@ -14,20 +14,19 @@ $(function () {
     var $PseudoBox = $('#pseudo');
     var $player_list = $('#player-list');
     var $readyButton = $('#ready');
+    var $msgBar = $('#msg');
 
     var socket = io();
     var player_name = null;
-    var player_color = null;
     var direction = null;
     var gameStarted = false;
-    var tempPlayer = null;
 
     $readyButton.hide();
 
     $InscriptionForm.submit(function (e) {
         e.preventDefault();
 
-        socket.emit('new inscription', new Player($PseudoBox.val(), 0, 0));
+        socket.emit('new inscription', new Player($PseudoBox.val(), 50, 50));
         player_name = $PseudoBox.val();
         $InscriptionForm.hide();
         $readyButton.show()
@@ -97,9 +96,17 @@ $(function () {
         ctx.clearRect(player.x,player.y, player.width, player.height);
     });
 
-    socket.on('player disconnect', (player, x, y) =>{
-        $('.'+player+'').remove();
-        ctx.clearRect(x, y, 100, 100)
+    socket.on("you died", () => {
+        $msgBar.append("<h1> You Died </h1>");
+    });
+
+    socket.on("player died", (player)=> {
+        ctx.clearRect(player.x, player.y, player.x+player.width, player.y+player.height)
+    });
+
+    socket.on('player disconnect', (player,) =>{
+        $('.'+player.name+'').remove();
+        ctx.clearRect(player.x, player.y, player.x+player.width, player.y+player.height)
     });
 
     function launchGame(){
