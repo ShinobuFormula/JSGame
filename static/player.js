@@ -6,6 +6,9 @@ class Player{
         this.x = x;
         this.y = y;
 
+        this.previousX = this.x;
+        this.previousY = this.y;
+
         this.height = 100;
         this.width = 100;
 

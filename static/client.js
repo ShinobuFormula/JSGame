@@ -26,7 +26,7 @@ $(function () {
     $InscriptionForm.submit(function (e) {
         e.preventDefault();
 
-        socket.emit('new inscription', new Player($PseudoBox.val(), 50, 50));
+        socket.emit('new inscription', new Player($PseudoBox.val(), 120, 100));
         player_name = $PseudoBox.val();
         $InscriptionForm.hide();
         $readyButton.show()
@@ -89,19 +89,26 @@ $(function () {
 
     socket.on("player has moved", (player) => {
         ctx.fillStyle = player.color;
+        ctx.clearRect(player.previousX, player.previousY, player.width, player.height);
         ctx.fillRect(player.x,player.y, player.width, player.height);
     });
 
-    socket.on("player clear", (player) => {
-        ctx.clearRect(player.x,player.y, player.width, player.height);
-    });
-
     socket.on("you died", () => {
-        $msgBar.append("<h1> You Died </h1>");
+        ctx.font = "100px Arial";
+        ctx.fillStyle = "green";
+        ctx.fillText("You lost !", 450, canvas.height/2);
     });
 
     socket.on("player died", (player)=> {
+        $('.'+player.name+'').css("text-decoration", "line-through");
         ctx.clearRect(player.x, player.y, player.x+player.width, player.y+player.height)
+    });
+
+    socket.on("you won", ()=> {
+        gameStarted = false;
+        ctx.font = "100px Arial";
+        ctx.fillStyle = "green";
+        ctx.fillText("You won !", 450, canvas.height/2);
     });
 
     socket.on('player disconnect', (player,) =>{
