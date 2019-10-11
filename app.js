@@ -61,6 +61,19 @@ io.on('connection', (socket) => {
             })
     });
 
+    socket.on("player shoot", (direction, bullet) => {
+        players.forEach((player) => {
+            if(player.name === bullet.player && player.alive){
+                bullet.color = player.color;
+                bullet.direction = direction;
+                bullet.x = player.x+(player.height/2);
+                bullet.y = player.y+(player.width/2);
+
+                shoot(bullet);
+            }
+        })
+    });
+
     socket.on('disconnect', function () {
         socketId.forEach((elem)=> {
             if(socket.id === elem[0]){
@@ -125,15 +138,16 @@ function pickColor(player) {
     colorIncrement++;
 }
 
+function shoot(bullet) {
+    move(bullet, bullet.direction, bullet.speed);
+}
+
 function checkDeath(player) {
     if(player.x + player.width >= 1270 || player.x <= 0 || player.y <=0 || player.y >= 600){
             die(player);
     }
 }
 function checkWin() {
-    console.log(players);
-    console.log(players.length);
-
     if(players.length === 1){
         gameStarted = false;
 
@@ -142,7 +156,17 @@ function checkWin() {
                 io.to(elem[0]).emit("you won");
             }
         });
+        io.sockets.emit("partyIsOver");
     }
+    initGame()
+}
+
+function initGame() {
+    gameStarted = false;
+    players = [];
+    socketId = [];
+    numberOfPlayerReady = 0;
+    colorIncrement = 0;
 }
 
 function die(player) {
@@ -169,7 +193,6 @@ function die(player) {
 function checkCollision(player, direction){
 
     players.forEach((elem) => {
-        console.log(elem.x + "  " + player.x);
         if((player.y >= elem.y) && (player.y <= elem.y + elem.height) && (player.name !== elem.name) && (player.x + player.width >= elem.x) && (player.x + player.width <= elem.x + elem.width)) {
             if((player.x + player.width === elem.x && player.y === elem.y+elem.height) && (direction === "RIGHT" || direction === "UP") ){
                 colision = false;
@@ -188,7 +211,10 @@ function checkCollision(player, direction){
             }
         }
         else if((player.y + player.height >= elem.y) && (player.y + player.height <= elem.y + elem.height) && (player.name !== elem.name) && (player.x + player.width >= elem.x) && (player.x + player.width <= elem.x + elem.width)) {
-            if(player.y + player.height === elem.y && direction === "DOWN"){
+            if((player.y + player.height === elem.y && player.x + player.width === elem.x) && (direction === "RIGHT" || direction === "DOWN") ){
+                colision = false;
+            }
+            else if(player.y + player.height === elem.y && direction === "DOWN"){
                 move(elem, direction, playerSpeed+pushPower);
                 io.sockets.emit("player has moved", elem);
                 checkDeath(elem);
@@ -202,7 +228,10 @@ function checkCollision(player, direction){
             }
         }
         else if((player.y >= elem.y) && (player.y <= elem.y + elem.height) && (player.name !== elem.name) && (player.x >= elem.x) && (player.x <= elem.x + elem.width)) {
-            if(player.y === elem.y + elem.height && direction === "UP"){
+            if((player.y === elem.y + elem.height && player.x === elem.x + elem.width) && (direction === "UP" || direction === "LEFT") ){
+                colision = false;
+            }
+            else if(player.y === elem.y + elem.height && direction === "UP"){
                 move(elem, direction, playerSpeed+pushPower);
                 io.sockets.emit("player has moved", elem);
                 checkDeath(elem);
@@ -216,7 +245,10 @@ function checkCollision(player, direction){
             }
         }
         else if((player.y + player.height >= elem.y) && (player.y + player.height  <= elem.y + elem.height) && (player.name !== elem.name) && (player.x >= elem.x) && (player.x <= elem.x + elem.width)) {
-            if(player.y + player.height === elem.y && direction === "DOWN"){
+            if((player.y + player.height === elem.y && player.x === elem.x + elem.width) && (direction === "DOWN" || direction === "LEFT") ){
+                colision = false;
+            }
+            else if(player.y + player.height === elem.y && direction === "DOWN"){
                 move(elem, direction, playerSpeed+pushPower);
                 io.sockets.emit("player has moved", elem);
                 checkDeath(elem);

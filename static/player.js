@@ -13,6 +13,32 @@ class Player{
         this.width = 100;
 
         this.alive = true;
+
+        this.bullet = true;
+
+        this.isShooting = false;
     }
 }
+
+class Bullet{
+    constructor(player){
+        this.player = player;
+        this.color = "black";
+
+        this.direction = null;
+
+        this.speed = 50;
+
+        this.x = null;
+        this.y = null;
+
+        this.previousX = this.x;
+        this.previousY = this.y;
+
+        this.height = 30;
+        this.width = 30;
+    }
+}
+
+
 
