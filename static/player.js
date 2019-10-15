@@ -27,13 +27,15 @@ class Bullet{
 
         this.direction = null;
 
-        this.speed = 50;
+        this.speed = 5;
 
         this.x = null;
         this.y = null;
 
         this.previousX = this.x;
         this.previousY = this.y;
+
+        this.shooted = false;
 
         this.height = 30;
         this.width = 30;

@@ -8,6 +8,7 @@ var players = [];
 var socketId = [];
 var gameStarted = false;
 var colision = false;
+var colisionBullet = false;
 var playerSpeed = 20;
 var pushPower = 20;
 var numberOfPlayerReady = 0;
@@ -68,8 +69,10 @@ io.on('connection', (socket) => {
                 bullet.direction = direction;
                 bullet.x = player.x+(player.height/2);
                 bullet.y = player.y+(player.width/2);
-
-                shoot(bullet);
+                bullet.shooted = true;
+                checkBulletCollision(bullet).then(()=> {
+                    console.log("Touché");
+                });
             }
         })
     });
@@ -138,15 +141,38 @@ function pickColor(player) {
     colorIncrement++;
 }
 
-function shoot(bullet) {
-    move(bullet, bullet.direction, bullet.speed);
-}
-
 function checkDeath(player) {
     if(player.x + player.width >= 1270 || player.x <= 0 || player.y <=0 || player.y >= 600){
             die(player);
     }
 }
+
+async function checkBulletCollision(bullet) {
+    return new Promise(resolve => {
+        while (!colisionBullet) {
+            players.forEach((elem) => {
+                if ((bullet.y >= elem.y) && (bullet.y <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x + bullet.width >= elem.x) && (bullet.x + bullet.width <= elem.x + elem.width)) {
+                    colisionBullet = true;
+                } else if ((bullet.y + bullet.height >= elem.y) && (bullet.y + bullet.height <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x + bullet.width >= elem.x) && (bullet.x + bullet.width <= elem.x + elem.width)) {
+                    colisionBullet = true;
+                } else if ((bullet.y >= elem.y) && (bullet.y <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x >= elem.x) && (bullet.x <= elem.x + elem.width)) {
+                    colisionBullet = true;
+                } else if ((bullet.y + bullet.height >= elem.y) && (bullet.y + bullet.height <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x >= elem.x) && (bullet.x <= elem.x + elem.width)) {
+                    colisionBullet = true;
+                }
+            });
+            if (bullet.x + bullet.width >= 1270 || bullet.x <= 0 || bullet.y <= 0 || bullet.y >= 600) {
+                colisionBullet = true;
+            }
+
+            move(bullet, bullet.direction, bullet.speed);
+
+            io.sockets.emit("player shooted", bullet);
+        }
+        resolve(bullet);
+    })
+}
+
 function checkWin() {
     if(players.length === 1){
         gameStarted = false;

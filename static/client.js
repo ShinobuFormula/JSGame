@@ -3,7 +3,7 @@ $(function () {
     const UP = 90;
     const DOWN = 83;
     const RIGHT = 68;
-    const LEFT = 91;
+    const LEFT = 81;
 
     const UP_ARROW = 38;
     const DOWN_ARROW = 40;
@@ -113,6 +113,11 @@ $(function () {
         ctx.fillStyle = player.color;
         ctx.clearRect(player.previousX, player.previousY, player.width, player.height);
         ctx.fillRect(player.x,player.y, player.width, player.height);
+    });
+
+    socket.on("player shooted" , (bullet) => {
+        ctx.clearRect(bullet.previousX, bullet.previousY, bullet.width, bullet.height);
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
 
     socket.on("you died", () => {
