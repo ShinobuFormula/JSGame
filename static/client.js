@@ -116,6 +116,7 @@ $(function () {
     });
 
     socket.on("player shooted" , (bullet) => {
+        ctx.fillStyle = bullet.color;
         ctx.clearRect(bullet.previousX, bullet.previousY, bullet.width, bullet.height);
         ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });

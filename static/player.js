@@ -23,6 +23,7 @@ class Player{
 class Bullet{
     constructor(player){
         this.player = player;
+        this.playerHit = null;
         this.color = "black";
 
         this.direction = null;
@@ -34,8 +35,6 @@ class Bullet{
 
         this.previousX = this.x;
         this.previousY = this.y;
-
-        this.shooted = false;
 
         this.height = 30;
         this.width = 30;

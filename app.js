@@ -64,14 +64,21 @@ io.on('connection', (socket) => {
 
     socket.on("player shoot", (direction, bullet) => {
         players.forEach((player) => {
-            if(player.name === bullet.player && player.alive){
+            if(player.name === bullet.player && player.alive && player.bullet){
                 bullet.color = player.color;
                 bullet.direction = direction;
                 bullet.x = player.x+(player.height/2);
                 bullet.y = player.y+(player.width/2);
-                bullet.shooted = true;
+                player.bullet = false;
+
                 checkBulletCollision(bullet).then(()=> {
-                    console.log("Touché");
+                    if(bullet.playerHit !== null) {
+                        move(bullet.playerHit, bullet.direction, playerSpeed + pushPower);
+                        io.sockets.emit("player has moved", bullet.playerHit);
+                        checkDeath(bullet.playerHit);
+                    }
+                    colisionBullet = false;
+                    player.bullet = true;
                 });
             }
         })
@@ -149,27 +156,35 @@ function checkDeath(player) {
 
 async function checkBulletCollision(bullet) {
     return new Promise(resolve => {
-        while (!colisionBullet) {
+        var inter = setInterval(()=>{
             players.forEach((elem) => {
                 if ((bullet.y >= elem.y) && (bullet.y <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x + bullet.width >= elem.x) && (bullet.x + bullet.width <= elem.x + elem.width)) {
+                    bullet.playerHit = elem;
                     colisionBullet = true;
                 } else if ((bullet.y + bullet.height >= elem.y) && (bullet.y + bullet.height <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x + bullet.width >= elem.x) && (bullet.x + bullet.width <= elem.x + elem.width)) {
+                    bullet.playerHit = elem;
                     colisionBullet = true;
                 } else if ((bullet.y >= elem.y) && (bullet.y <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x >= elem.x) && (bullet.x <= elem.x + elem.width)) {
+                    bullet.playerHit = elem;
                     colisionBullet = true;
                 } else if ((bullet.y + bullet.height >= elem.y) && (bullet.y + bullet.height <= elem.y + elem.height) && (bullet.player !== elem.name) && (bullet.x >= elem.x) && (bullet.x <= elem.x + elem.width)) {
+                    bullet.playerHit = elem;
                     colisionBullet = true;
                 }
             });
             if (bullet.x + bullet.width >= 1270 || bullet.x <= 0 || bullet.y <= 0 || bullet.y >= 600) {
                 colisionBullet = true;
             }
-
             move(bullet, bullet.direction, bullet.speed);
 
             io.sockets.emit("player shooted", bullet);
-        }
-        resolve(bullet);
+
+            if (colisionBullet) {
+                console.log(bullet.playerHit);
+                resolve(bullet);
+                clearInterval(inter);
+            }
+        }, 20);
     })
 }
 
