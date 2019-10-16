@@ -11,6 +11,7 @@ var colision = false;
 var colisionBullet = false;
 var playerSpeed = 20;
 var pushPower = 20;
+var bulletPushPower = 40;
 var numberOfPlayerReady = 0;
 var colorIncrement = 0;
 
@@ -42,7 +43,7 @@ io.on('connection', (socket) => {
                 io.sockets.emit("send ready player", player);
             }
         });
-        if(numberOfPlayerReady >= players.length*75/100){
+        if(numberOfPlayerReady >= players.length*75/100 && numberOfPlayerReady > 1){
             io.sockets.emit("game start");
             gameStarted = true;
         }
@@ -73,10 +74,11 @@ io.on('connection', (socket) => {
 
                 checkBulletCollision(bullet).then(()=> {
                     if(bullet.playerHit !== null) {
-                        move(bullet.playerHit, bullet.direction, playerSpeed + pushPower);
+                        move(bullet.playerHit, bullet.direction, playerSpeed + bulletPushPower);
                         io.sockets.emit("player has moved", bullet.playerHit);
                         checkDeath(bullet.playerHit);
                     }
+                    io.sockets.emit("bullet disapear", bullet);
                     colisionBullet = false;
                     player.bullet = true;
                 });
@@ -180,26 +182,25 @@ async function checkBulletCollision(bullet) {
             io.sockets.emit("player shooted", bullet);
 
             if (colisionBullet) {
-                console.log(bullet.playerHit);
                 resolve(bullet);
                 clearInterval(inter);
             }
-        }, 20);
+        }, 15);
     })
 }
 
 function checkWin() {
     if(players.length === 1){
         gameStarted = false;
-
         socketId.forEach((elem)=> {
             if (elem[1] === players[0].name) {
                 io.to(elem[0]).emit("you won");
             }
         });
         io.sockets.emit("partyIsOver");
+        initGame()
     }
-    initGame()
+
 }
 
 function initGame() {

@@ -31,7 +31,7 @@ $(function () {
     $InscriptionForm.submit(function (e) {
         e.preventDefault();
 
-        socket.emit('new inscription', new Player($PseudoBox.val(), 120, 100));
+        socket.emit('new inscription', new Player($PseudoBox.val(), 300, 200));
         player_name = $PseudoBox.val();
         $InscriptionForm.hide();
         $readyButton.show()
@@ -119,6 +119,10 @@ $(function () {
         ctx.fillStyle = bullet.color;
         ctx.clearRect(bullet.previousX, bullet.previousY, bullet.width, bullet.height);
         ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    });
+
+    socket.on("bullet disapear",(bullet)=>{
+        ctx.clearRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
 
     socket.on("you died", () => {
